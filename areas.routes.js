@@ -1,21 +1,19 @@
 import express from "express";
+
 import {
   createArea,
   listAreas,
   getArea,
   updateArea,
   deleteArea
-} from "../controllers/areas.controller.js";
-
-import authMiddleware from "../middleware/authMiddleware.js";
+} from "./areas.controller.js";
 
 const router = express.Router();
 
-// Cuando estés lista, quita los comentarios para activar JWT
-router.post("/", /* authMiddleware, */ createArea);
-router.get("/", /* authMiddleware, */ listAreas);
-router.get("/:id", /* authMiddleware, */ getArea);
-router.put("/:id", /* authMiddleware, */ updateArea);
-router.delete("/:id", /* authMiddleware, */ deleteArea);
+router.post("/", createArea);
+router.get("/", listAreas);
+router.get("/:id", getArea);
+router.put("/:id", updateArea);
+router.delete("/:id", deleteArea);
 
 export default router;
