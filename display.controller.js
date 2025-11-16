@@ -1,50 +1,25 @@
-import pool from "../db/db.js";
+import pool from "./db.js";
 
-export const getDisplayByArea = async (req, res) => {
+export const getDisplayTurns = async (req, res) => {
   try {
-    const areaId = req.params.areaId;
+    const { rows } = await pool.query(
+      `SELECT 
+         t.idturno,
+         t.estado,
+         p.nombre AS paciente,
+         a.nombrearea AS area
+       FROM turnos t
+       LEFT JOIN pacientes p ON p.idpaciente = t.idpaciente
+       LEFT JOIN areashospital a ON a.idarea = t.idarea
+       ORDER BY t.idturno DESC
+       LIMIT 10`
+    );
 
-    // Turno actual (llamando o atendiendo)
-    const currentQ = `
-      SELECT 
-        t.idturno, 
-        t.numeroturno, 
-        e.estado AS estado,
-        p.nombrecompleto AS paciente
-      FROM turnos t
-      JOIN estadoturno e ON e.idestado = t.idestado
-      JOIN pacientes p ON p.idpaciente = t.idpaciente
-      WHERE t.idarea = $1 
-        AND e.estado IN ('Llamando', 'Atendiendo')
-      ORDER BY t.fechacreacion DESC
-      LIMIT 1
-    `;
-
-    // Siguiente turno en espera
-    const nextQ = `
-      SELECT 
-        t.idturno, 
-        t.numeroturno
-      FROM turnos t
-      JOIN estadoturno e ON e.idestado = t.idestado
-      WHERE t.idarea = $1 
-        AND e.estado = 'Espera'
-      ORDER BY t.fechacreacion ASC
-      LIMIT 1
-    `;
-
-    const { rows: currRows } = await pool.query(currentQ, [areaId]);
-    const { rows: nextRows } = await pool.query(nextQ, [areaId]);
-
-    res.json({
-      current: currRows[0] || null,
-      next: nextRows[0] || null,
-      timestamp: new Date()
-    });
-
+    res.json(rows);
   } catch (err) {
-    console.error("display error:", err);
-    res.status(500).json({ error: "Error obteniendo información del display" });
+    console.error("getDisplayTurns error:", err);
+    res.status(500).json({ error: "Error obteniendo datos del display" });
   }
 };
+
 
