@@ -1,25 +1,22 @@
 import pool from "./db.js";
 
-export const getDisplayTurns = async (req, res) => {
+export const getDisplayByArea = async (req, res) => {
   try {
+    const { areaId } = req.params;
+
     const { rows } = await pool.query(
-      `SELECT 
-         t.idturno,
-         t.estado,
-         p.nombre AS paciente,
-         a.nombrearea AS area
-       FROM turnos t
-       LEFT JOIN pacientes p ON p.idpaciente = t.idpaciente
-       LEFT JOIN areashospital a ON a.idarea = t.idarea
-       ORDER BY t.idturno DESC
-       LIMIT 10`
+      `SELECT d.iddisplay, d.nombredisplay, d.descripcion, d.activo,
+              a.idarea, a.nombrearea
+       FROM displays d
+       INNER JOIN areashospital a ON d.idarea = a.idarea
+       WHERE d.idarea = $1
+       ORDER BY d.iddisplay`,
+      [areaId]
     );
 
     res.json(rows);
   } catch (err) {
-    console.error("getDisplayTurns error:", err);
-    res.status(500).json({ error: "Error obteniendo datos del display" });
+    console.error("getDisplayByArea error:", err);
+    res.status(500).json({ error: "Error obteniendo displays por área" });
   }
 };
-
-
