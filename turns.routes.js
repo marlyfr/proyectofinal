@@ -4,8 +4,7 @@ import {
   listTurns,
   getTurn,
   updateTurn,
-  deleteTurn,
-  callNextTurn
+  deleteTurn
 } from "./turns.controller.js";
 
 const router = express.Router();
@@ -15,8 +14,5 @@ router.get("/", listTurns);
 router.get("/:id", getTurn);
 router.put("/:id", updateTurn);
 router.delete("/:id", deleteTurn);
-
-// Especial
-router.post("/next", callNextTurn);
 
 export default router;
