@@ -1,6 +1,6 @@
 import pool from "./db.js";
 import bcrypt from "bcryptjs";
-import generateToken from "./utils/generateToken.js";
+import generateToken from "./generateToken.js";   // ← CORREGIDO
 
 // ============================
 // REGISTRO
