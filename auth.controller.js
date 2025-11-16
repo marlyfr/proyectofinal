@@ -1,6 +1,6 @@
-import pool from "../db/db.js";
+import pool from "./db.js";
 import bcrypt from "bcryptjs";
-import generateToken from "../utils/generateToken.js";
+import generateToken from "./utils/generateToken.js";
 
 // ============================
 // REGISTRO
@@ -13,7 +13,6 @@ export const register = async (req, res) => {
   }
 
   try {
-    // Verificar duplicado
     const checkUser = await pool.query(
       `SELECT * FROM "Usuarios" WHERE "Usuario" = $1`,
       [Usuario]
@@ -50,7 +49,6 @@ export const login = async (req, res) => {
   }
 
   try {
-    // Buscar usuario EXACTAMENTE como está en Render (Respeta mayúsculas)
     const result = await pool.query(
       `SELECT "IdUsuario","NombreCompleto","Usuario","Correo","ContrasenaHash","IdRol"
        FROM "Usuarios"
@@ -64,7 +62,6 @@ export const login = async (req, res) => {
 
     const user = result.rows[0];
 
-    // Comparar contraseña
     const valid = await bcrypt.compare(password, user.ContrasenaHash);
     if (!valid) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
@@ -83,3 +80,4 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
+
