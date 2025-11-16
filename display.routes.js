@@ -1,8 +1,8 @@
 import express from "express";
-import { getDisplayTurns } from "./display.controller.js";
+import { getDisplayByArea } from "./display.controller.js";
 
 const router = express.Router();
 
-router.get("/", getDisplayTurns);
+router.get("/area/:areaId", getDisplayByArea);
 
 export default router;
