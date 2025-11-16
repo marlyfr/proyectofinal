@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { login, register } from "./auth.js";  // ← IMPORTACIÓN CORRECTA
+import express from "express";
+import { register, login } from "./auth.controller.js";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/login", login);
 router.post("/register", register);
+router.post("/login", login);
 
 export default router;
