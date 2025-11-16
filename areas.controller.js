@@ -1,8 +1,5 @@
-import pool from "../db/db.js";
+import pool from "./db.js";
 
-// ============================
-// CREAR ÁREA
-// ============================
 export const createArea = async (req, res) => {
   try {
     const { nombrearea, descripcion } = req.body;
@@ -21,14 +18,9 @@ export const createArea = async (req, res) => {
   }
 };
 
-// ============================
-// LISTAR ÁREAS
-// ============================
 export const listAreas = async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM areashospital ORDER BY idarea`
-    );
+    const { rows } = await pool.query(`SELECT * FROM areashospital ORDER BY idarea`);
     res.json(rows);
   } catch (err) {
     console.error("listAreas error:", err);
@@ -36,21 +28,14 @@ export const listAreas = async (req, res) => {
   }
 };
 
-// ============================
-// OBTENER UNA ÁREA
-// ============================
 export const getArea = async (req, res) => {
   try {
-    const id = req.params.id;
-
     const { rows } = await pool.query(
       `SELECT * FROM areashospital WHERE idarea = $1`,
-      [id]
+      [req.params.id]
     );
 
-    if (!rows[0]) {
-      return res.status(404).json({ error: "Área no encontrada" });
-    }
+    if (!rows[0]) return res.status(404).json({ error: "Área no encontrada" });
 
     res.json(rows[0]);
   } catch (err) {
@@ -59,23 +44,18 @@ export const getArea = async (req, res) => {
   }
 };
 
-// ============================
-// ACTUALIZAR ÁREA
-// ============================
 export const updateArea = async (req, res) => {
   try {
-    const id = req.params.id;
     const { nombrearea, descripcion, activo } = req.body;
 
     const { rows } = await pool.query(
       `UPDATE areashospital
-       SET 
-         nombrearea = COALESCE($1, nombrearea),
-         descripcion = COALESCE($2, descripcion),
-         activo = COALESCE($3, activo)
+       SET nombrearea = COALESCE($1, nombrearea),
+           descripcion = COALESCE($2, descripcion),
+           activo = COALESCE($3, activo)
        WHERE idarea = $4
        RETURNING *`,
-      [nombrearea, descripcion, activo, id]
+      [nombrearea, descripcion, activo, req.params.id]
     );
 
     res.json(rows[0]);
@@ -85,17 +65,11 @@ export const updateArea = async (req, res) => {
   }
 };
 
-// ============================
-// ELIMINAR ÁREA
-// ============================
 export const deleteArea = async (req, res) => {
   try {
-    const id = req.params.id;
-
-    await pool.query(
-      `DELETE FROM areashospital WHERE idarea = $1`,
-      [id]
-    );
+    await pool.query(`DELETE FROM areashospital WHERE idarea = $1`, [
+      req.params.id
+    ]);
 
     res.json({ message: "Área eliminada" });
   } catch (err) {
@@ -103,3 +77,4 @@ export const deleteArea = async (req, res) => {
     res.status(500).json({ error: "Error eliminando área" });
   }
 };
+
