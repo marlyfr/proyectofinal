@@ -1,10 +1,10 @@
 import pool from "./db.js";
 import bcrypt from "bcryptjs";
-import generateToken from "./generateToken.js";   // ← CORREGIDO
+import generateToken from "./generateToken.js";
 
-// ============================
+// ========================================
 // REGISTRO
-// ============================
+// ========================================
 export const register = async (req, res) => {
   const { NombreCompleto, Usuario, Correo, password, IdRol } = req.body;
 
@@ -13,8 +13,9 @@ export const register = async (req, res) => {
   }
 
   try {
+    // Verificar usuario duplicado
     const checkUser = await pool.query(
-      `SELECT * FROM "Usuarios" WHERE "Usuario" = $1`,
+      "SELECT * FROM usuarios WHERE usuario = $1",
       [Usuario]
     );
 
@@ -22,10 +23,12 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
+    // Encriptar contraseña
     const hash = await bcrypt.hash(password, 10);
 
+    // Insertar
     await pool.query(
-      `INSERT INTO "Usuarios" ("NombreCompleto","Usuario","Correo","ContrasenaHash","IdRol")
+      `INSERT INTO usuarios (nombrecompleto, usuario, correo, contrasenahash, idrol)
        VALUES ($1,$2,$3,$4,$5)`,
       [NombreCompleto, Usuario, Correo, hash, IdRol]
     );
@@ -38,21 +41,24 @@ export const register = async (req, res) => {
   }
 };
 
-// ============================
+
+// ========================================
 // LOGIN
-// ============================
+// ========================================
 export const login = async (req, res) => {
   const { Usuario, password } = req.body;
 
+  // Validar datos
   if (!Usuario || !password) {
     return res.status(400).json({ message: "Usuario y contraseña son obligatorios" });
   }
 
   try {
+    // Buscar usuario
     const result = await pool.query(
-      `SELECT "IdUsuario","NombreCompleto","Usuario","Correo","ContrasenaHash","IdRol"
-       FROM "Usuarios"
-       WHERE "Usuario" = $1`,
+      `SELECT idusuario, nombrecompleto, usuario, correo, contrasenahash, idrol
+       FROM usuarios
+       WHERE usuario = $1`,
       [Usuario]
     );
 
@@ -62,11 +68,13 @@ export const login = async (req, res) => {
 
     const user = result.rows[0];
 
-    const valid = await bcrypt.compare(password, user.ContrasenaHash);
+    // Comparar contraseña
+    const valid = await bcrypt.compare(password, user.contrasenahash);
     if (!valid) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
+    // Generar token
     const token = generateToken(user);
 
     return res.json({
@@ -80,6 +88,3 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
-
-
